@@ -148,25 +148,25 @@ export default function SubjectPage() {
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 
   return (
-    <main className="min-h-screen bg-slate-50 p-8 text-slate-900">
+    <main className="min-h-screen bg-pink-50 p-8 text-slate-900">
       <div className="max-w-4xl mx-auto flex flex-col gap-6">
         
-        <Link href="/" className="text-rose-600 hover:underline inline-block font-medium">← Retour à l'accueil</Link>
+        <Link href="/" className="text-pink-500 hover:underline inline-block font-medium">← Retour à l'accueil</Link>
 
         {/* HEADER */}
-        <header className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <header className="bg-white p-6 rounded-xl shadow-sm border border-pink-200">
           <div className="flex justify-between items-start mb-4">
-            <h1 className="text-3xl font-bold text-slate-800">{subjectName}</h1>
+            <h1 className="text-3xl font-bold text-pink-800">{subjectName}</h1>
           </div>
           <div className="w-full bg-slate-200 rounded-full h-4 mb-2 overflow-hidden">
-            <div className="bg-rose-500 h-4 rounded-full transition-all duration-1000" style={{ width: `${progressPercentage}%` }}></div>
+            <div className="bg-pink-800 h-4 rounded-full transition-all duration-1000" style={{ width: `${progressPercentage}%` }}></div>
           </div>
           <p className="text-sm text-slate-500 text-right font-medium">{completedTasks} sur {totalTasks} tâches ({progressPercentage}%)</p>
         </header>
 
         {/* NOUVEAU : SECTION OBJECTIFS / COMPÉTENCES */}
-        <div className="bg-rose-50 p-6 rounded-xl shadow-sm border border-rose-100">
-          <h2 className="text-xl font-bold mb-4 text-rose-800 flex items-center gap-2">🎯 Compétences à valider</h2>
+        <div className="bg-rose-50 p-6 rounded-xl shadow-sm border border-pink-100">
+          <h2 className="text-xl font-bold mb-4 text-pink-800 flex items-center gap-2">🎯 Compétences à valider</h2>
           
           <ul className="flex flex-col gap-2 mb-4">
             {objectives.map(obj => (
@@ -186,28 +186,28 @@ export default function SubjectPage() {
             <input 
               type="text" value={newObjectiveTitle} onChange={(e) => setNewObjectiveTitle(e.target.value)} 
               placeholder="Ex: Comprendre le théorème de Pythagore..." 
-              className="flex-1 border border-rose-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400 text-sm" 
+              className="flex-1 border border-rose-200 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 text-sm" 
             />
-            <button type="submit" disabled={isAddingObjective || !newObjectiveTitle.trim()} className="bg-rose-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-rose-700 text-sm">
+            <button type="submit" disabled={isAddingObjective || !newObjectiveTitle.trim()} className="bg-pink-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-pink-700 text-sm">
               Ajouter
             </button>
           </form>
         </div>
 
         {/* SECTION AJOUT TÂCHE */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 className="text-xl font-bold mb-4 text-slate-800">Ajouter une tâche d'action</h2>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-pink-200">
+          <h2 className="text-xl font-bold mb-4 text-pink-800">Ajouter une tâche d'action</h2>
           <form onSubmit={handleAddTask} className="flex flex-col md:flex-row gap-3">
-            <input type="text" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} placeholder="Ex: Faire les exos 1 à 5..." className="flex-1 border border-slate-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400" />
-            <input type="date" value={newTaskDueDate} onChange={(e) => setNewTaskDueDate(e.target.value)} className="border border-slate-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-400" />
+            <input type="text" value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} placeholder="Ex: Faire les exos 1 à 5..." className="flex-1 border border-slate-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400" />
+            <input type="date" value={newTaskDueDate} onChange={(e) => setNewTaskDueDate(e.target.value)} className="border border-slate-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400" />
             <button type="submit" disabled={isAddingTask || !newTaskTitle.trim()} className="bg-slate-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-900">Ajouter</button>
           </form>
         </div>
 
         {/* SECTION TÂCHES avec Filtres et Tri */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-pink-200">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
-            <h2 className="text-xl font-bold text-slate-800">Tâches</h2>
+            <h2 className="text-xl font-bold text-pink-800">Tâches</h2>
             
             <div className="flex flex-wrap items-center gap-4">
               {/* NOUVEAU : Sélecteur de Tri */}
@@ -222,10 +222,10 @@ export default function SubjectPage() {
 
               {/* Filtres d'onglets (Inchangé) */}
               <div className="flex bg-slate-100 p-1 rounded-lg">
-                <button onClick={() => setActiveFilter('all')} className={`px-3 py-1.5 text-xs font-semibold rounded-md ${activeFilter === 'all' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500'}`}>Toutes</button>
-                <button onClick={() => setActiveFilter('not_started')} className={`px-3 py-1.5 text-xs font-semibold rounded-md ${activeFilter === 'not_started' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500'}`}>À faire</button>
-                <button onClick={() => setActiveFilter('in_progress')} className={`px-3 py-1.5 text-xs font-semibold rounded-md ${activeFilter === 'in_progress' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500'}`}>En cours</button>
-                <button onClick={() => setActiveFilter('completed')} className={`px-3 py-1.5 text-xs font-semibold rounded-md ${activeFilter === 'completed' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500'}`}>Terminées</button>
+                <button onClick={() => setActiveFilter('all')} className={`px-3 py-1.5 text-xs font-semibold rounded-md ${activeFilter === 'all' ? 'bg-white text-pink-600 shadow-sm' : 'text-slate-500'}`}>Toutes</button>
+                <button onClick={() => setActiveFilter('not_started')} className={`px-3 py-1.5 text-xs font-semibold rounded-md ${activeFilter === 'not_started' ? 'bg-white text-pink-600 shadow-sm' : 'text-slate-500'}`}>À faire</button>
+                <button onClick={() => setActiveFilter('in_progress')} className={`px-3 py-1.5 text-xs font-semibold rounded-md ${activeFilter === 'in_progress' ? 'bg-white text-pink-600 shadow-sm' : 'text-slate-500'}`}>En cours</button>
+                <button onClick={() => setActiveFilter('completed')} className={`px-3 py-1.5 text-xs font-semibold rounded-md ${activeFilter === 'completed' ? 'bg-white text-pink-600 shadow-sm' : 'text-slate-500'}`}>Terminées</button>
               </div>
             </div>
           </div>
