@@ -115,18 +115,18 @@ export default function Home() {
     return false;
   }).sort((a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime());
 
-  // Si on n'a pas encore l'utilisateur, on affiche une page blanche pour éviter un "clignotement" moche
+  // ... (Garde tout le code du haut de page.tsx exactement comme avant) ...
+
   if (!user) return <div className="min-h-screen bg-beige-300"></div>;
 
   return (
     <main className="min-h-screen bg-beige-300 p-8 text-slate-900">
       <div className="max-w-6xl mx-auto">
         
-        {/* NOUVEAU : Barre du haut avec le message de bienvenue et la déconnexion */}
+        {/* NOUVEAU DESIGN : Barre du haut (Nom de l'appli et Déconnexion) */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-pink-800">
-            {/* On coupe l'email à l'arobase pour te dire bonjour ! (ex: loan@univ.fr -> Bonjour loan) */}
-            Bonjour {user.email?.split('@')[0]} 👋
+          <h2 className="text-xl font-bold text-pink-800 flex items-center gap-2">
+            📚 Study Timeline
           </h2>
           <button 
             onClick={handleLogout}
@@ -136,12 +136,15 @@ export default function Home() {
           </button>
         </div>
 
-        {/* En-tête avec la JAUGE GLOBALE */}
+        {/* NOUVEAU DESIGN : En-tête avec le vrai Prénom et la Jauge */}
         <header className="mb-10 bg-white/50 p-6 rounded-xl shadow-sm border border-pink-200">
           <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-4">
             <div>
-              <h1 className="text-4xl font-bold text-pink-800">Study Timeline 📚</h1>
-              <p className="text-pink-500 mt-2">Vue d'ensemble de tes révisions.</p>
+              {/* On va chercher le prénom dans les user_metadata. S'il n'y en a pas (vieux compte), on met "Étudiant" */}
+              <h1 className="text-4xl font-bold text-pink-800">
+                Bonjour {user.user_metadata?.first_name || "Étudiant"} 👋
+              </h1>
+              <p className="text-pink-500 mt-2 font-medium">Prêt(e) pour tes révisions du jour ?</p>
             </div>
             <div className="mt-4 md:mt-0 bg-pink-50 text-pink-500 px-4 py-2 rounded-lg font-bold border border-pink-100">
               Progression Globale : {globalProgress}%
@@ -154,6 +157,8 @@ export default function Home() {
             {completedTasks} tâches terminées sur {totalTasks}
           </p>
         </header>
+
+        {/* ... LE RESTE DU CODE (Planning, Tâches en cours, etc.) RESTE INCHANGÉ EN DESSOUS ... */}
 
         {/* LE WIDGET PLANNING */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-pink-100 mb-8">
