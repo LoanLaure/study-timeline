@@ -51,7 +51,7 @@ export default function LoginPage() {
         email,
         password,
       });
-      if (error) setError("Email ou mot de passe incorrect.");
+      if (error) setError(`Erreur Supabase : ${error.message}`);
       else router.push("/"); // Succès : on renvoie vers l'accueil !
     }
     
