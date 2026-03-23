@@ -141,7 +141,7 @@ export default function Home() {
                 Après-demain
               </button>
               <button onClick={() => setActiveDateTab('upcoming')} className={`whitespace-nowrap px-4 py-2 text-sm font-semibold rounded-md transition-all ${activeDateTab === 'upcoming' ? 'bg-white text-pink-600 shadow-sm' : 'text-pink-400 hover:text-pink-600'}`}>
-                À venir
+                À venirf
               </button>
             </div>
           </div>
