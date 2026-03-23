@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// NOUVEAU : On importe useRouter pour pouvoir te rediriger vers /login
 import { useRouter } from "next/navigation"; 
 import Link from "next/link";
 import { supabase } from "./lib/supabase";
@@ -13,7 +12,8 @@ type DateTab = 'today' | 'tomorrow' | 'dayAfter' | 'upcoming';
 export default function Home() {
   const router = useRouter();
   
-  // NOUVEAU : Le State pour stocker l'utilisateur connecté
+  // NOUVEAU : On gère l'état global de l'authentification (chargement, connecté, ou visiteur)
+  const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
   const [user, setUser] = useState<any>(null);
 
   const [newSubject, setNewSubject] = useState("");
@@ -26,24 +26,23 @@ export default function Home() {
 
   const [activeDateTab, setActiveDateTab] = useState<DateTab>('today');
 
-  // NOUVEAU : Le fameux "Videur" (Auth Guard)
+  // Le "Videur" intelligent
   useEffect(() => {
     const checkUser = async () => {
-      // 1. On demande à Supabase si quelqu'un est connecté (s'il y a une session)
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        // 2. Si pas de session, DEHORS ! On te renvoie vers la page de connexion
-        router.push('/login');
+        // Au lieu de te jeter vers /login, le videur dit : "Affiche la Landing Page !"
+        setAuthStatus('unauthenticated');
       } else {
-        // 3. Si tu es connecté, on sauvegarde ton profil et on va chercher TES données
         setUser(session.user);
+        setAuthStatus('authenticated');
         fetchDashboardData();
       }
     };
     
     checkUser();
-  }, [router]);
+  }, []);
 
   const fetchDashboardData = async () => {
     setIsFetchingData(true);
@@ -68,29 +67,29 @@ export default function Home() {
     setIsLoading(true);
     setMessage("");
 
-    // CRUCIAL : Maintenant qu'on a la RLS, on DOIT préciser que cette matière t'appartient !
     const { error } = await supabase.from('subjects').insert([{ 
       name: newSubject.trim(),
-      user_id: user.id // <-- On accroche ton ID utilisateur à cette nouvelle matière
+      user_id: user.id
     }]);
 
     if (error) {
       if (error.code === '23505') setMessage("❌ Cette matière existe déjà !");
       else setMessage("❌ Erreur lors de l'ajout.");
     } else {
-      setMessage(`✅ Ajouté avec succès !`);
+      setMessage(`✅ Ajouté !`);
       setNewSubject("");
       fetchDashboardData(); 
     }
     setIsLoading(false);
   };
 
-  // NOUVEAU : Fonction pour se déconnecter
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/login');
+    setAuthStatus('unauthenticated');
+    setUser(null);
   };
 
+  // --- CALCULS DU DASHBOARD ---
   const totalTasks = allTasks.length;
   const completedTasks = allTasks.filter(task => task.status === 'completed').length;
   const globalProgress = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
@@ -115,34 +114,81 @@ export default function Home() {
     return false;
   }).sort((a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime());
 
-  // ... (Garde tout le code du haut de page.tsx exactement comme avant) ...
+  // 1. ÉCRAN DE CHARGEMENT
+  if (authStatus === 'loading') return <div className="min-h-screen bg-beige-300"></div>;
 
-  if (!user) return <div className="min-h-screen bg-beige-300"></div>;
+  // 2. ÉCRAN VISITEUR : LA LANDING PAGE MAGNIFIQUE
+  if (authStatus === 'unauthenticated') {
+    return (
+      <main className="min-h-screen bg-beige-300 flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
+        {/* Cercles décoratifs en arrière-plan */}
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
 
+        <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
+          <div className="text-8xl mb-6 shadow-2xl rounded-3xl bg-white p-6 transform rotate-[-5deg] hover:rotate-0 transition-transform duration-300">
+            📚
+          </div>
+          <h1 className="text-5xl md:text-6xl font-extrabold text-pink-800 mb-6 tracking-tight">
+            Study Timeline
+          </h1>
+          <p className="text-xl text-pink-600 mb-10 font-medium leading-relaxed max-w-lg">
+            Organise tes révisions, valide tes objectifs et détruis la procrastination avec un planning conçu pour les étudiants.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+            <Link 
+              href="/login" 
+              className="bg-pink-600 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg shadow-pink-200 hover:bg-pink-700 hover:scale-105 transition-all w-full sm:w-auto"
+            >
+              Commencer gratuitement
+            </Link>
+            <Link 
+              href="/login" 
+              className="bg-white text-pink-600 px-8 py-4 rounded-full font-bold text-lg shadow-sm border border-pink-200 hover:bg-pink-50 transition-all w-full sm:w-auto"
+            >
+              J'ai déjà un compte
+            </Link>
+          </div>
+
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 text-left w-full">
+            <div className="bg-white/60 p-6 rounded-2xl border border-pink-100">
+              <h3 className="font-bold text-pink-800 mb-2">📊 Progression</h3>
+              <p className="text-sm text-pink-600">Visualise ton avancée matière par matière avec des jauges en temps réel.</p>
+            </div>
+            <div className="bg-white/60 p-6 rounded-2xl border border-pink-100">
+              <h3 className="font-bold text-pink-800 mb-2">🗓️ Planning</h3>
+              <p className="text-sm text-pink-600">Concentre-toi sur tes tâches du jour et celles en retard pour rester à flot.</p>
+            </div>
+            <div className="bg-white/60 p-6 rounded-2xl border border-pink-100">
+              <h3 className="font-bold text-pink-800 mb-2">🎯 Objectifs</h3>
+              <p className="text-sm text-pink-600">Sépare tes actions quotidiennes de tes compétences clés à valider.</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // 3. ÉCRAN CONNECTÉ : TON DASHBOARD
   return (
     <main className="min-h-screen bg-beige-300 p-8 text-slate-900">
       <div className="max-w-6xl mx-auto">
         
-        {/* NOUVEAU DESIGN : Barre du haut (Nom de l'appli et Déconnexion) */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-pink-800 flex items-center gap-2">
             📚 Study Timeline
           </h2>
-          <button 
-            onClick={handleLogout}
-            className="text-sm font-semibold text-pink-600 bg-white/50 px-4 py-2 rounded-lg border border-pink-200 hover:bg-white transition-colors"
-          >
+          <button onClick={handleLogout} className="text-sm font-semibold text-pink-600 bg-white/50 px-4 py-2 rounded-lg border border-pink-200 hover:bg-white transition-colors">
             Se déconnecter
           </button>
         </div>
 
-        {/* NOUVEAU DESIGN : En-tête avec le vrai Prénom et la Jauge */}
         <header className="mb-10 bg-white/50 p-6 rounded-xl shadow-sm border border-pink-200">
           <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-4">
             <div>
-              {/* On va chercher le prénom dans les user_metadata. S'il n'y en a pas (vieux compte), on met "Étudiant" */}
               <h1 className="text-4xl font-bold text-pink-800">
-                Bonjour {user.user_metadata?.first_name || "Étudiant"} 👋
+                Bonjour {user?.user_metadata?.first_name || "Étudiant"} 👋
               </h1>
               <p className="text-pink-500 mt-2 font-medium">Prêt(e) pour tes révisions du jour ?</p>
             </div>
@@ -158,9 +204,7 @@ export default function Home() {
           </p>
         </header>
 
-        {/* ... LE RESTE DU CODE (Planning, Tâches en cours, etc.) RESTE INCHANGÉ EN DESSOUS ... */}
-
-        {/* LE WIDGET PLANNING */}
+        {/* WIDGET PLANNING (Inchangé) */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-pink-100 mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <h2 className="text-2xl font-bold text-pink-800 flex items-center gap-2">🗓️ Mon Planning</h2>
@@ -174,7 +218,6 @@ export default function Home() {
           {isFetchingData ? <p className="text-pink-400">Chargement de ton planning...</p> : plannedTasks.length === 0 ? (
             <div className="text-center py-8 bg-pink-50/50 rounded-lg border border-dashed border-pink-200">
               <p className="text-pink-600 font-medium">Aucune tâche prévue pour cette date ! 🎉</p>
-              <p className="text-sm text-pink-400 mt-1">Profite de ton temps libre ou prends de l'avance.</p>
             </div>
           ) : (
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -225,11 +268,15 @@ export default function Home() {
           </div>
 
           <div className="lg:col-span-2 flex flex-col gap-6">
+            
             <div className="bg-white p-6 rounded-xl shadow-sm border border-pink-100">
               <h2 className="text-xl font-bold mb-4 text-pink-800">Ajouter une matière</h2>
-              <form onSubmit={handleAddSubject} className="flex gap-3">
+              {/* NOUVEAU : Formulaire Responsive (flex-col sur mobile, flex-row sur PC) */}
+              <form onSubmit={handleAddSubject} className="flex flex-col sm:flex-row gap-3">
                 <input type="text" value={newSubject} onChange={(e) => setNewSubject(e.target.value)} placeholder="Ex: Base de données..." className="flex-1 border border-slate-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400" disabled={isLoading} />
-                <button type="submit" disabled={isLoading || !newSubject.trim()} className="bg-pink-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-pink-700 disabled:bg-slate-300">Ajouter</button>
+                <button type="submit" disabled={isLoading || !newSubject.trim()} className="bg-pink-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-pink-700 disabled:bg-slate-300 whitespace-nowrap">
+                  Ajouter
+                </button>
               </form>
               {message && <p className="mt-2 text-sm font-medium text-slate-600">{message}</p>}
             </div>
